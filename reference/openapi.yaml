@@ -1,0 +1,99 @@
+openapi: "3.0.1"
+info:
+  title: "API Documentation"
+  version: "1.0"
+paths:
+  /uc/auth/login:
+    post:
+      summary: "用户登录"
+      description: "用户登录"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+              - "loginType"
+              type: "object"
+              properties:
+                loginType:
+                  type: "string"
+                  description: "{ADMIN=管理员动态码登录;由 AdminAuthenticationProvider 处理。\
+                    , DEVELOPER_PASSWORD=开发者密码登录;由 PasswordAuthenticationProvider\
+                    \ 处理,面向开发者自助注册的账号。, REFRESH=刷新 token 换发;可携带 targetTenantId 切换租\
+                    户。}"
+                  enum:
+                  - "ADMIN"
+                  - "DEVELOPER_PASSWORD"
+                  - "REFRESH"
+                username:
+                  type: "string"
+                  description: "登录名;ADMIN / PASSWORD 必填,REFRESH 可空"
+                challenge:
+                  type: "string"
+                  description: "挑战值;ADMIN 为「密码 或 TOTP」,PASSWORD 为明文密码,REFRESH 为空"
+                signature:
+                  type: "string"
+                  description: "动态码;6 位 TOTP,仅 ADMIN 路径使用(与 challenge 二选一)"
+                refreshToken:
+                  type: "string"
+                  description: "刷新 token;REFRESH 必带,其余类型可空"
+                captchaKey:
+                  type: "string"
+                  description: "图形验证码 token;与前端 img src 同 key"
+                captchaCode:
+                  type: "string"
+                  description: "用户输入的图形验证码;与 captchaKey 一并 verify,PASSWORD / ADMIN\
+                    \ 必填"
+              description: ""
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  code:
+                    type: "string"
+                    description: "业务码;ok/fail_* 等"
+                  message:
+                    type: "string"
+                    description: "业务消息;成功为\"成功\""
+                  data:
+                    type: "object"
+                    properties:
+                      accessToken:
+                        type: "string"
+                        description: "访问 token"
+                      refreshToken:
+                        type: "string"
+                        description: "刷新 token"
+                      accessExpiresIn:
+                        type: "integer"
+                        description: "访问 token 有效期;秒"
+                        format: "int64"
+                      refreshExpiresIn:
+                        type: "integer"
+                        description: "刷新 token 有效期;秒"
+                        format: "int64"
+                    description: "业务数据;失败时 null"
+components:
+  schemas:
+    登录成功响应;访问 + 刷新令牌对。:
+      type: "object"
+      properties:
+        accessToken:
+          type: "string"
+          description: "访问 token"
+        refreshToken:
+          type: "string"
+          description: "刷新 token"
+        accessExpiresIn:
+          type: "integer"
+          description: "访问 token 有效期;秒"
+          format: "int64"
+        refreshExpiresIn:
+          type: "integer"
+          description: "刷新 token 有效期;秒"
+          format: "int64"
+      description: "业务数据;失败时 null"
